@@ -30,24 +30,27 @@ var firebaseConfig = {
     var trainName = $("#train-name-input").val().trim();
     var traindestination = $("#destination-input").val().trim();
     var trainStart = moment($("#start-input").val().trim(), "HH:mm").format("X");
-    var trainfrequency = moment($("#frequency-input").val().trim(), "mm").format("X")
-  
+    var trainfrequency = $("#frequency-input").val().trim();
+
+    // Calculate the next train
+    var frequencyConverter = trainfrequency*60;
+    console.log(frequencyConverter);
+    var trainNext = trainStart+trainfrequency;
+    console.log(trainNext);
+    var trainNextPretty = moment(trainNext, "X").format("HH:mm");
+    console.log(trainNextPretty);
+
     // Creates local "temporary" object for holding train data
     var newtrain = {
       name: trainName,
       destination: traindestination,
       start: trainStart,
-      frequency: trainfrequency
+      frequency: trainfrequency,
+      nextTrain: trainNextPretty
     };
   
     // Uploads train data to the database
     database.ref().push(newtrain);
-  
-    // Logs everything to console
-    console.log(newtrain.name);
-    console.log(newtrain.destination);
-    console.log(newtrain.start);
-    console.log(newtrain.frequency);
   
     alert("train successfully added");
   
@@ -60,40 +63,33 @@ var firebaseConfig = {
   
   // 3. Create Firebase event for adding train to the database and a row in the html when a user adds an entry
   database.ref().on("child_added", function(childSnapshot) {
-    console.log(childSnapshot.val());
   
     // Store everything into a variable.
-    var trainName = childSnapshot.val().name;
-    var traindestination = childSnapshot.val().destination;
-    var trainStart = childSnapshot.val().start;
-    var trainfrequency = childSnapshot.val().frequency;
+    var trName = childSnapshot.val().name;
+    var trdestination = childSnapshot.val().destination;
+    var trStart = childSnapshot.val().start;
+    var trfrequency = childSnapshot.val().frequency;
+    var trNext = childSnapshot.val().nextTrain;
   
     // train Info
-    console.log(trainName);
-    console.log(traindestination);
-    console.log(trainStart);
-    console.log(trainfrequency);
-  
+    
     // Prettify the train start
-    var trainStartPretty = moment.unix(trainStart).format("HH:mm");
-    console.log(trainStartPretty)
-  
-    // Calculate the next train
-    var trainNext = trainStart+trainfrequency;
-    var trainNextPretty = moment.unix(trainNext).format("HH:mm")
-    console.log(trainNextPretty);
+    var trainStartPretty = moment(trStart,"X").format("HH:mm");
   
   
     // Create the new row
     var newRow = $("<tr>").append(
-      $("<td>").text(trainName),
-      $("<td>").text(traindestination),
+      $("<td>").text(trName),
+      $("<td>").text(trdestination),
       $("<td>").text(trainStartPretty),
-      $("<td>").text(trainfrequency + "mins"),
-      $("<td>").text(trainNext)
+      $("<td>").text(trfrequency + " mins"),
+      $("<td>").text(trNext)
     );
   
     // Append the new row to the table
     $("#train-table > tbody").append(newRow);
   });
+  $("#clear-all").on("click", function(){
+
+  })
   
